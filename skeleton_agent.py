@@ -27,48 +27,44 @@ from rlglue.types import Observation
 from random import Random
 
 class skeleton_agent(Agent):
-	randGenerator=Random()
-	lastAction=Action()
-	lastObservation=Observation()
-	
-	def agent_init(self,taskSpec):
-		#See the sample_sarsa_agent in the mines-sarsa-example project for how to parse the task spec
-		self.lastAction=Action()
-		self.lastObservation=Observation()
-		
-	def agent_start(self,observation):
-		#Generate random action, 0 or 1
-		thisIntAction=self.randGenerator.randint(0,1)
-		returnAction=Action()
-		returnAction.intArray=[thisIntAction]
-		
-		lastAction=copy.deepcopy(returnAction)
-		lastObservation=copy.deepcopy(observation)
+    def __init__(self):
+        pass
+    
+    def agent_init(self,taskSpec):
+        #See the sample_sarsa_agent in the mines-sarsa-example project for how to parse the task spec
+        self.lastAction=Action()
+        self.lastObservation=Observation()
+            
+    def agent_start(self,observation):
+        #Generate random action, 0 or 1
+        thisIntAction=self.randGenerator.randint(0,1)
+        returnAction=Action()
+        returnAction.intArray=[thisIntAction]
+        
+        lastAction=copy.deepcopy(returnAction)
+        lastObservation=copy.deepcopy(observation)
 
-		return returnAction
-	
-	def agent_step(self,reward, observation):
-		#Generate random action, 0 or 1
-		thisIntAction=self.randGenerator.randint(0,1)
-		returnAction=Action()
-		returnAction.intArray=[thisIntAction]
-		
-		lastAction=copy.deepcopy(returnAction)
-		lastObservation=copy.deepcopy(observation)
+        return returnAction
+    
+    def agent_step(self,reward, observation):
+        #Generate random action, 0 or 1
+        thisIntAction=self.randGenerator.randint(0,1)
+        returnAction=Action()
+        returnAction.intArray=[thisIntAction]
+        
+        lastAction=copy.deepcopy(returnAction)
+        lastObservation=copy.deepcopy(observation)
 
-		return returnAction
-	
-	def agent_end(self,reward):
-		pass
-	
-	def agent_cleanup(self):
-		pass
-	
-	def agent_message(self,inMessage):
-		if inMessage=="what is your name?":
-			return "my name is skeleton_agent, Python edition!";
-		else:
-			return "I don't know how to respond to your message";
+        return returnAction
+    
+    def agent_end(self,reward):
+        pass
+    
+    def agent_cleanup(self):
+        pass
+    
+    def agent_message(self,inMessage):
+        print inMessage
 
 
 if __name__=="__main__":
