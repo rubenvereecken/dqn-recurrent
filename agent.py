@@ -1,39 +1,52 @@
-# 
-# Copyright (C) 2008, Brian Tanner
-# 
-#http://rl-glue-ext.googlecode.com/
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
-import random
-import sys
 import copy
+import cPickle as pickle
+import argparse
 from rlglue.agent.Agent import Agent
 from rlglue.agent import AgentLoader as AgentLoader
 from rlglue.types import Action
 from rlglue.types import Observation
 
-from random import Random
+import numpy as np
 
-class skeleton_agent(Agent):
-    def __init__(self):
+from common import Message, MessageType
+
+FRAME_WIDTH = 160
+FRAME_HEIGHT = 210
+FRAME_SIZE = FRAME_WIDTH * FRAME_HEIGHT
+RAM_SIZE = 128
+
+class QAgent(Agent):
+    def __init__(self, args):
+        # I'm of half a mind to just dump all args into the agent, but then it wouldn't 
+        # be very pretty to debug or anything. So I'll be nice and write boilerplate. Thank me future me!
+        # for key in arg_dict:
+        #     setattr(self, key, arg_dict[key])
+
+        # self.state_dim  = args.state_dim            # State dimensionality.
+        # self.actions    = args.actions
+        # self.n_actions  = len(self.actions)
+        # self.verbose    = args.verbose
+        # self.best       = args.best
+
+        # # epsilon annealing
+        # self.ep         = args.ep or 1             # Exploration rate
+        # self.ep_start   = self.ep                  # Annealing start
+        # self.ep_end     = args.ep_end or self.ep   # Lowest possible ep?
+        # self.ep_endt    = args.ep_endt or 1000000  # Stop annealing at some t
+
+        # # These will be used to keep track of transitions
+        # self.last_action = None
+        # self.last_observation = None
         pass
-    
+
     def agent_init(self,taskSpec):
-        #See the sample_sarsa_agent in the mines-sarsa-example project for how to parse the task spec
-        self.lastAction=Action()
-        self.lastObservation=Observation()
+        # Maybe we can do something with the task spec at some point, verify that it meets expectations
+        pass
+
+    def extract_frame(self, observation):
+        # Frames are located right after the RAM. Every value is in [0, 127]
+        return np.array(observation.intArray[RAM_SIZE:RAM_SIZE+FRAME_SIZE], dtype=np.uint8)
+        
             
     def agent_start(self,observation):
         #Generate random action, 0 or 1
@@ -41,8 +54,8 @@ class skeleton_agent(Agent):
         returnAction=Action()
         returnAction.intArray=[thisIntAction]
         
-        lastAction=copy.deepcopy(returnAction)
-        lastObservation=copy.deepcopy(observation)
+        last_action=copy.deepcopy(returnAction)
+        last_observation=copy.deepcopy(observation)
 
         return returnAction
     
@@ -52,8 +65,8 @@ class skeleton_agent(Agent):
         returnAction=Action()
         returnAction.intArray=[thisIntAction]
         
-        lastAction=copy.deepcopy(returnAction)
-        lastObservation=copy.deepcopy(observation)
+        last_action=copy.deepcopy(returnAction)
+        last_observation=copy.deepcopy(observation)
 
         return returnAction
     
@@ -68,4 +81,9 @@ class skeleton_agent(Agent):
 
 
 if __name__=="__main__":
-	AgentLoader.loadAgent(skeleton_agent())
+    parser = argparse.ArgumentParser(description='Run DQN Recurrent experiment')
+    parser.add_argument('--learn_start', metavar='L', type=int, default=5*10**4,
+                        help='only start learning after an amount of steps in order to build a db')
+    args = parser.parse_args()
+
+    AgentLoader.loadAgent(QAgent(args))

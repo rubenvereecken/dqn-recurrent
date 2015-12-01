@@ -15,3 +15,7 @@ class Message(object):
 
     def dumps(self):
         return pickle.dumps(self)
+
+    @classmethod
+    def loads(self, aMessage):
+        return pickle.loads(aMessage)

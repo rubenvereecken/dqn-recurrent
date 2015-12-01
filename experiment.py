@@ -1,34 +1,21 @@
 import argparse
-import simplejson as json
 
 import rlglue.RLGlue as RLGlue
 
 from common import Message, MessageType
 
-parser = argparse.ArgumentParser(description='Run DQN Recurrent experiment')
-parser.add_argument('--steps', metavar='S', type=int, default=10**5,
-                    help='total amount of steps to train for')
-
-parser.add_argument('--report_freq', metavar='R', type=int, default=5*10**3,
-                    help='frequency of report output for both experiment and agent')
-parser.add_argument('--eval_freq', metavar='E', type=int, default=10**4,
-                    help='frequency of greedy evaluation for metric gathering')
-parser.add_argument('--save_freq', metavar='S', type=int, default=5*10**4,
-                    help='todo')
-
-# learn_start should be in experiment because it should know when to switch to greedy eval,
-# since agent can't trivially control the experiment
-parser.add_argument('--learn_start', metavar='L', type=int, default=5*10**4,
-                    help='only start learning after an amount of steps in order to build a db')
-
-args = parser.parse_args()
 
 class Experiment(object):
-    def __init__(self, args):
+    # To consult all parameters present, check out the argument parser below
+    def __init__(self, arg_dict):
         self.step = 0
-        self.max_steps = args.steps
         self.n_train_episodes = 0
         self.agent_params = None
+
+        # Simple load the whole argument dictionary into self
+        for key in arg_dict:
+            setattr(self, key, arg_dict[key])
+
 
     def start(self):
         print "\nExperiment starting!"
@@ -45,7 +32,7 @@ class Experiment(object):
 
         observ_action = RLGlue.RL_start()
 
-        while self.step <= self.max_steps:
+        while self.step <= self.steps:
             observ_action_term = RLGlue.RL_step()
 
             # If game ends, start another
@@ -65,35 +52,29 @@ class Experiment(object):
             if should_save():
                 pass
 
+        print "A job well done."
+        RLGlue.RL_cleanup()
+
 
 
     def message_agent(self, msg, data=None):
-        return RL_agent_message(Message(msg, data).dumps())
+        return RLGlue.RL_agent_message(Message(msg, data).dumps())
 
 
 
 if __name__ == '__main__':
-    experiment = Experiment(args)
+    parser = argparse.ArgumentParser(description='Run DQN Recurrent experiment')
+    parser.add_argument('--steps', metavar='S', type=int, default=10**5,
+                        help='total amount of steps to train for')
+
+    parser.add_argument('--report_freq', metavar='R', type=int, default=5*10**3,
+                        help='frequency of report output for both experiment and agent')
+    parser.add_argument('--eval_freq', metavar='E', type=int, default=10**4,
+                        help='frequency of greedy evaluation for metric gathering')
+    parser.add_argument('--save_freq', metavar='S', type=int, default=5*10**4,
+                        help='todo')
+
+    args = parser.parse_args()
+
+    experiment = Experiment(vars(args))
     experiment.start()
-    # Step through episodes. 1-based
-    step = 0
-
-
-
-
-
-         
-
-
-
-
-    for whichEpisode in range(1, numeps+1):
-	terminal=RLGlue.RL_episode(arg.maxsteps)
-	totalSteps=RLGlue.RL_num_steps()
-	totalReward=RLGlue.RL_return()
-
-        # Not sure what this terminal variable is
-        print "Episode {}\t#Steps {}\tTotal reward {}\tNatural end? {}".format(whichEpisode, totalSteps, totalReward, terminal)
-
-    print "A job well done."
-    RLGlue.RL_cleanup()
